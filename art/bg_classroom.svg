@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<rect width="960" height="540" fill="#ffe7b8"/><rect y="400" width="960" height="140" fill="#b98a5e"/><rect y="394" width="960" height="8" fill="#7b5335"/>
+<rect x="210" y="60" width="540" height="250" rx="8" fill="#7b5335"/><rect x="224" y="74" width="512" height="222" fill="#22574f"/>
+<g font-family="sans-serif" font-size="34" fill="#f7f7f2" opacity=".85"><text x="260" y="130">0.5 = ½</text><text x="510" y="130">¾ = 0.75</text><text x="260" y="210">0.25 + 0.5</text><text x="520" y="210">⅓ + ⅓</text><text x="300" y="272" font-size="24">Math Club — Math Month!</text></g>
+<rect x="60" y="110" width="106" height="130" fill="#8fd8f2" stroke="#fff4d6" stroke-width="8"/><rect x="794" y="110" width="106" height="130" fill="#8fd8f2" stroke="#fff4d6" stroke-width="8"/>
+</svg>

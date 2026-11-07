@@ -1,0 +1,28 @@
+{
+  "intro": [
+    { "who": "Narrator", "bg": "bg_school", "text": "Kim is a Grade 5 student at Masigasig Academy. He is tall, cheerful, and very lazy about studying." },
+    { "who": "Kim", "bg": "bg_school", "text": "Math is too complicated. And when will I ever use it in real life?" },
+    { "who": "Vince", "bg": "bg_school", "text": "Kim! You should join the Math Club. I'm the president, and I know we can raise your score." },
+    { "who": "Kim", "bg": "bg_school", "text": "No thanks, Vince. I'm not interested." },
+    { "who": "Narrator", "bg": "bg_classroom", "text": "Then Mathematics Month arrived. The teacher announced that everyone who joins the Math Club earns incentives toward their marks." },
+    { "who": "Vince", "bg": "bg_classroom", "text": "So... what do you think now?" },
+    { "who": "Kim", "bg": "bg_classroom", "text": "Okay. I'll try. Maybe I can raise my grades and finally get good at this." },
+    { "who": "Vince", "bg": "bg_classroom", "text": "That's the spirit! Your training begins now, General Kim." }
+  ],
+  "after1": [
+    { "who": "Vince", "bg": "bg_classroom", "text": "You beat the Elite stage! Decimals don't look so scary now, do they?" },
+    { "who": "Kim", "bg": "bg_classroom", "text": "They actually started to make sense. What's next?" },
+    { "who": "Vince", "bg": "bg_classroom", "text": "Fractions. Grab your pencils, and watch out for the bats." }
+  ],
+  "after2": [
+    { "who": "Kim", "bg": "bg_classroom", "text": "I can't believe it. I finished the Master stage!" },
+    { "who": "Vince", "bg": "bg_classroom", "text": "You worked hard for that. One last trial: Grand Master, with fractions and decimals together." },
+    { "who": "Vince", "bg": "bg_classroom", "text": "This time there are no choices. You'll have to work out every answer yourself." }
+  ],
+  "ending": [
+    { "who": "Narrator", "bg": "bg_school", "text": "Kim kept going, even when things felt difficult. He didn't just rely on the incentives. He learned to figure things out." },
+    { "who": "Narrator", "bg": "bg_school", "text": "His grades rose, and he made it to the top of his class. Together, Kim and Vince won many competitions, in school and beyond." },
+    { "who": "Kim", "bg": "bg_school", "text": "Thank you, Vince. If you hadn't kept asking me, I would never have made it here." },
+    { "who": "Vince", "bg": "bg_school", "text": "I only asked. You did the work." }
+  ]
+}
