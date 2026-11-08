@@ -11,8 +11,21 @@ func _ready() -> void:
 	box.add_child(row)
 	row.add_child(_character("kim_down_1", "Kim the General", "The main character. Single-player hero of the game."))
 	row.add_child(_character("vince", "Vince", "Math Club president. Teaches the lessons and quizzes."))
-	box.add_child(UI.label("Music and sound effects are original and were generated for this game.", 17, UI.MUTED))
+	box.add_child(UI.label("Credits", 22, UI.INK, true))
+	var credits := HBoxContainer.new()
+	credits.add_theme_constant_override("separation", 16)
+	box.add_child(credits)
+	credits.add_child(_credit("Kim D. Catalan", "Lead Programmer"))
+	credits.add_child(_credit("Joemar M. Amor", "Documentation"))
 	box.add_child(UI.button("Back", func() -> void: Game.go("menu")))
+
+
+func _credit(person: String, role: String) -> Control:
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_child(UI.label(person, 19, UI.TEAL_DARK, true))
+	column.add_child(UI.label(role, 16, UI.MUTED, true))
+	return column
 
 
 func _character(art: String, title: String, text: String) -> Control:

@@ -54,9 +54,26 @@ func _check_menu_pages() -> void:
 	await _press("About")
 	await _press("Back")
 	await _press("Settings")
+	await _check_mute_hover()
 	await _press("Done")
 	if OS.has_feature("web"):
 		_expect(_find_button("Exit") == null, "Exit hidden on web")
+
+
+## Mute must keep its background when it is on and the mouse is over it.
+func _check_mute_hover() -> void:
+	var mute := _find_button("Mute all sound") as CheckButton
+	_expect(mute != null, "mute toggle in settings")
+	var was_muted := mute.button_pressed
+	mute.button_pressed = true
+	var style := mute.get_theme_stylebox("hover_pressed") as StyleBoxFlat
+	_expect(style != null and style.bg_color.a > 0.0, "mute keeps a background on hover")
+	var motion := InputEventMouseMotion.new()
+	motion.position = get_tree().root.get_final_transform() * mute.get_global_rect().get_center()
+	Input.parse_input_event(motion)
+	await _wait(3)
+	await _shot("mute_hover")
+	mute.button_pressed = was_muted
 
 
 func _play_stage(stage: int) -> void:
