@@ -2,7 +2,7 @@
 
 A 2D educational game that teaches elementary students decimals and fractions. Built with Godot 4.7 and GDScript.
 
-This project is a rebuild and enhancement of my original thesis game from 2021, an Android game made in Godot 3.2. I rebuilt it from scratch with the same learning goals, plus new art, sound, lessons and controls, so it now runs on the web, Windows and Android.
+This project is a rebuild and enhancement of my original thesis game from 2021, an Android game made in Godot 3.2. I rebuilt it from scratch with the same learning goals, plus new art, sound, lessons and controls, so it now runs on the Web, Windows and Android.
 
 ## About the game
 
