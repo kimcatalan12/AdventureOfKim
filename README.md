@@ -19,6 +19,7 @@ Kim is a student at Masigasig Academy who thinks math is too hard. When his best
 - **Lessons from Vince:** each stage opens with worked examples and a practice question.
 - **Learn as you explore:** every book and pencil Kim collects teaches a math fact.
 - **Quizzes:** 20 questions per stage. Get at least 10 right on the first try to pass.
+- **Fresh every run:** a new map layout, new questions and new worked examples each time a stage starts.
 - **Life savers:** Kim has 3. Enemies and wrong answers cost one, and a wrong answer sends Kim to find another fact before trying again.
 - **Plays anywhere:** keyboard, on-screen joystick or touch arrows.
 - **Story and progress:** story scenes, saved progress and a completion certificate.

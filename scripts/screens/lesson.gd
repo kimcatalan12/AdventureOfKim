@@ -15,6 +15,7 @@ var _reveal_id := 0
 
 func _ready() -> void:
 	_data = Game.load_stage(args["stage"])
+	_data["trial"] = QuestionMaker.new().practice(args["stage"])
 	UI.background(self, "bg_classroom")
 	var vince := UI.image("vince", Vector2(150, 190))
 	vince.position = Vector2(14, 320)

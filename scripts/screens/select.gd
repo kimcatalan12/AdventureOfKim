@@ -12,7 +12,39 @@ func _ready() -> void:
 	box.add_child(row)
 	for number in range(1, Game.STAGE_COUNT + 1):
 		row.add_child(_stage_column(number))
+	if OS.is_debug_build():
+		_add_test_row(box)
 	box.add_child(UI.button("Back", func() -> void: Game.go("menu")))
+
+
+## Only when running from the Godot editor (debug builds), never in the
+## exported game. Lets you jump ahead to test later stages and cutscenes.
+## Using a shortcut turns off saving until you close the game, so your real
+## progress stays the same.
+func _add_test_row(box: VBoxContainer) -> void:
+	box.add_child(UI.label("Test shortcuts (editor only, progress is not saved)", 16, UI.MUTED, true))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	box.add_child(row)
+	var shortcuts := {
+		"Unlock all": func() -> void:
+			Game.unlocked = Game.STAGE_COUNT
+			Game.go("select"),
+		"Cutscene + Stage 3": func() -> void:
+			Game.go("story", {"key": "after2", "next": "lesson", "next_args": {"stage": 3}}),
+		"Ending": func() -> void:
+			for stage in range(1, Game.STAGE_COUNT + 1):
+				Game.best_scores[stage] = maxi(int(Game.best_scores.get(stage, 0)), 15)
+			Game.go("certificate"),
+	}
+	for text: String in shortcuts:
+		var action: Callable = shortcuts[text]
+		var button := UI.button(text, func() -> void:
+			Game.saving_enabled = false
+			action.call(), Vector2(0, 40))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 17)
+		row.add_child(button)
 
 
 func _stage_column(number: int) -> Control:

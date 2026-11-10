@@ -86,19 +86,49 @@ func _test_answers() -> void:
 	_ok(not MathAnswer.same_value("0.7", "0.75"), "different values do not match")
 
 
+const RUNS := 150
+
+
+## Questions and maps are made fresh each run, so check many random runs.
 func _test_stage_data(stage: int) -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/stage%d.json" % stage))
-	var questions: Array = data["questions"]
-	_ok(questions.size() == 20, "stage %d has 20 questions" % stage)
-	var seen := {}
-	for question: Dictionary in questions:
-		_ok(not seen.has(question["q"]), "duplicate question: " + question["q"])
-		seen[question["q"]] = true
-		_test_question(stage, question)
-	_test_question(stage, data["trial"])
 	_ok(data["facts"].size() >= 12, "stage %d has enough facts" % stage)
-	_ok((questions[0].has("choices")) != data.get("typed", false), "stage %d question type" % stage)
-	_test_map(stage, data)
+	var typed: bool = data.get("typed", false)
+	var texts := {}
+	for run in RUNS:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = stage * 100000 + run
+		var maker := QuestionMaker.new(rng)
+		var questions := maker.quiz(stage, 20)
+		_ok(questions.size() == 20, "stage %d run %d has 20 questions" % [stage, run])
+		var seen := {}
+		for question: Dictionary in questions:
+			_ok(not seen.has(question["q"]), "duplicate question: " + question["q"])
+			seen[question["q"]] = true
+			texts[question["q"] + str(question.get("choices", []))] = true
+			_ok(question.has("choices") != typed, "stage %d question type: %s" % [stage, question["q"]])
+			_test_question(stage, question)
+		_test_question(stage, maker.practice(stage))
+		_ok(not maker.example_fact(stage).is_empty(), "stage %d example fact" % stage)
+		_test_map(stage, MapMaker.make(rng))
+	# Different runs should give mostly different questions.
+	_ok(texts.size() > RUNS * 10, "stage %d questions vary between runs (%d different)" % [stage, texts.size()])
+	var first := MapMaker.make(_seeded(1))
+	var second := MapMaker.make(_seeded(2))
+	_ok(first != second, "stage %d maps differ between runs" % stage)
+	var starts := {}
+	for run in 40:
+		var rows := MapMaker.make(_seeded(stage * 1000 + run))
+		for y in rows.size():
+			if rows[y].contains("P"):
+				starts[Vector2i(rows[y].find("P"), y)] = true
+	_ok(starts.size() == 4, "stage %d: Kim starts in all four corners across runs" % stage)
+
+
+func _seeded(value: int) -> RandomNumberGenerator:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = value
+	return rng
 
 
 func _test_question(stage: int, question: Dictionary) -> void:
@@ -126,8 +156,7 @@ func _test_question(stage: int, question: Dictionary) -> void:
 		_ok(unique.size() == 4, label + " choices are different")
 
 
-func _test_map(stage: int, data: Dictionary) -> void:
-	var map: Array = data["map"]
+func _test_map(stage: int, map: PackedStringArray) -> void:
 	var width: int = map[0].length()
 	var start := Vector2i(-1, -1)
 	var open := 0
@@ -140,6 +169,9 @@ func _test_map(stage: int, data: Dictionary) -> void:
 				start = Vector2i(x, y)
 			if row[x] == "." or row[x] == "P":
 				open += 1
+	_ok(map.size() == MapMaker.HEIGHT and width == MapMaker.WIDTH, "stage %d map size" % stage)
+	_ok(map[0].count("#") == width and map[map.size() - 1].count("#") == width, "stage %d top and bottom walls" % stage)
+	_ok(open >= MapMaker.MIN_OPEN, "stage %d map has enough floor" % stage)
 	_ok(start.x >= 0, "stage %d has a start" % stage)
 	var reached := {start: true}
 	var queue: Array[Vector2i] = [start]

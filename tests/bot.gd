@@ -45,7 +45,28 @@ func _run() -> void:
 	await _skip_story()
 	_expect(Game.screen.get_script().resource_path.ends_with("menu.gd"), "back at menu after ending")
 	_expect(Game.finished, "game marked finished")
+	await _check_test_shortcuts()
 	_finish("BOT PASS")
+
+
+## The editor-only shortcuts on the stage select screen.
+func _check_test_shortcuts() -> void:
+	await _press("Play")
+	await _shot("select_test")
+	await _press("Ending")
+	_expect(_on("certificate.gd"), "Ending shortcut opens the certificate")
+	await _press("Continue")
+	await _skip_story()
+	_expect(_on("menu.gd"), "ending cutscene returns to the menu")
+	await _press("Play")
+	await _press("Cutscene + Stage 3")
+	_expect(_on("story.gd"), "shortcut plays the cutscene before stage 3")
+	await _skip_story()
+	_expect(_on("lesson.gd") and Game.screen.args["stage"] == 3, "cutscene leads to the stage 3 lesson")
+
+
+func _on(script_name: String) -> bool:
+	return Game.screen.get_script().resource_path.ends_with(script_name)
 
 
 func _check_menu_pages() -> void:
@@ -110,13 +131,11 @@ func _lesson() -> void:
 
 func _test_controls() -> void:
 	var stage: Screen = Game.screen
-	for enemy: Enemy in stage.enemies:
-		enemy.position = Vector2(1300, 800)
-		enemy.frozen = true
+	_park_enemies(stage)
 	await _hold_key(KEY_RIGHT, Vector2.RIGHT, "arrow key")
 	await _hold_key(KEY_A, Vector2.LEFT, "WASD key")
 	# Walls: walk left until blocked; Kim must stop at the wall, not pass it.
-	stage.player.position = Vector2(200, 300)
+	stage.player.position = _left_wall_spot(stage)
 	var press := _key(KEY_LEFT, true)
 	Input.parse_input_event(press)
 	await _wait(60)
@@ -133,7 +152,7 @@ func _test_controls() -> void:
 	await _shot("arrows")
 	await _hold_touch(TouchControls.ARROW_CENTER, TouchControls.ARROW_CENTER + Vector2(0, 50), Vector2.DOWN, "touch arrows")
 	Game.touch_style = Game.TouchStyle.HIDDEN
-	stage.player.position = Vector2(120, 120)
+	stage.player.position = _start_point(stage)
 	for enemy: Enemy in stage.enemies:
 		enemy.frozen = false
 	await _wait()
@@ -149,7 +168,7 @@ func _key(code: Key, pressed: bool) -> InputEventKey:
 
 func _hold_key(code: Key, direction: Vector2, what: String) -> void:
 	var player: Player = Game.screen.player
-	player.position = Vector2(300, 240)
+	player.position = _open_spot(Game.screen)
 	var before := player.position
 	Input.parse_input_event(_key(code, true))
 	await _wait(12)
@@ -160,7 +179,7 @@ func _hold_key(code: Key, direction: Vector2, what: String) -> void:
 
 func _hold_touch(start: Vector2, end: Vector2, direction: Vector2, what: String) -> void:
 	var player: Player = Game.screen.player
-	player.position = Vector2(300, 240)
+	player.position = _open_spot(Game.screen)
 	var before := player.position
 	# Events arrive in window coordinates; the headless window is much smaller.
 	var to_window := get_tree().root.get_final_transform()
@@ -196,7 +215,7 @@ func _test_pause_and_enemy() -> void:
 	stage.player.start_blink(0.0)
 	await _wait(3)
 	_expect(stage.rules.lives == 2, "touching an enemy costs a life saver")
-	stage.player.position = Vector2(72, 72)
+	stage.player.position = _start_point(stage)
 	await _wait()
 
 
@@ -239,10 +258,71 @@ func _answer_all(stage_number: int) -> void:
 
 
 func _move_away_from_enemies(stage: Screen) -> void:
-	for enemy: Enemy in stage.enemies:
-		enemy.position = Vector2(72, 72) + Vector2(randf() * 40.0, 0)
-		enemy.frozen = true
+	_park_enemies(stage)
 	stage.player.start_blink(0.0)
+
+
+## Freezes the enemies far outside the map so they can't touch Kim.
+func _park_enemies(stage: Screen) -> void:
+	for enemy: Enemy in stage.enemies:
+		enemy.position = Vector2(-1000, -1000) + Vector2(randf() * 40.0, 0)
+		enemy.frozen = true
+
+
+# The map is random, so the bot looks for floor instead of using fixed spots.
+
+## Open floor with nothing on it.
+func _is_floor(stage: Screen, cell: Vector2i) -> bool:
+	var map: PackedStringArray = stage.data["map"]
+	if cell.y < 0 or cell.y >= map.size() or cell.x < 0 or cell.x >= map[0].length():
+		return false
+	# A book or pencil on the tile would open a fact pop-up mid-test.
+	for item: Sprite2D in stage.collectibles:
+		if Vector2i((item.position / 48.0).floor()) == cell:
+			return false
+	return map[cell.y][cell.x] in [".", "P"]
+
+
+func _cell_center(cell: Vector2i) -> Vector2:
+	return (Vector2(cell) + Vector2(0.5, 0.5)) * 48.0
+
+
+func _start_point(stage: Screen) -> Vector2:
+	var map: PackedStringArray = stage.data["map"]
+	for y in map.size():
+		var x := map[y].find("P")
+		if x >= 0:
+			return _cell_center(Vector2i(x, y))
+	return Vector2(72, 72)
+
+
+## A floor tile with open floor three tiles left, right and down.
+func _open_spot(stage: Screen) -> Vector2:
+	var map: PackedStringArray = stage.data["map"]
+	for y in map.size():
+		for x in map[0].length():
+			var ok := true
+			for i in range(-3, 4):
+				ok = ok and _is_floor(stage, Vector2i(x + i, y))
+			for i in range(0, 4):
+				ok = ok and _is_floor(stage, Vector2i(x, y + i))
+			if ok:
+				return _cell_center(Vector2i(x, y))
+	_expect(false, "map has an open spot")
+	return Vector2.ZERO
+
+
+## Four floor tiles in a row next to the left wall, for the wall test.
+func _left_wall_spot(stage: Screen) -> Vector2:
+	var map: PackedStringArray = stage.data["map"]
+	for y in range(1, map.size() - 1):
+		var ok := true
+		for x in range(1, 5):
+			ok = ok and _is_floor(stage, Vector2i(x, y))
+		if ok:
+			return _cell_center(Vector2i(4, y))
+	_expect(false, "map has a clear row by the left wall")
+	return Vector2.ZERO
 
 
 func _give_right(question: Dictionary) -> void:

@@ -19,6 +19,8 @@ var muted := false
 var music_level := 0.7
 var effects_level := 0.9
 var touch_style := TouchStyle.HIDDEN
+## Shuffled indexes still to show, by deck name (for example "facts1").
+var decks := {}
 
 
 func _ready() -> void:
@@ -65,6 +67,19 @@ func record_pass(stage: int, score: int) -> void:
 	save_progress()
 
 
+## Returns the next index (0 to count - 1) from a shuffled deck. Each index
+## comes up once before any repeats, and the deck is saved between runs.
+func draw_from_deck(deck_name: String, count: int) -> int:
+	var deck: Array = decks.get(deck_name, []).filter(func(i: int) -> bool: return i < count)
+	if deck.is_empty():
+		deck = range(count)
+		deck.shuffle()
+	var index: int = deck.pop_back()
+	decks[deck_name] = deck
+	save_progress()
+	return index
+
+
 func save_progress() -> void:
 	if not saving_enabled:
 		return
@@ -73,6 +88,7 @@ func save_progress() -> void:
 	file.set_value("progress", "seen_intro", seen_intro)
 	file.set_value("progress", "finished", finished)
 	file.set_value("progress", "best_scores", best_scores)
+	file.set_value("progress", "decks", decks)
 	file.set_value("settings", "muted", muted)
 	file.set_value("settings", "music_level", music_level)
 	file.set_value("settings", "effects_level", effects_level)
@@ -88,6 +104,7 @@ func load_progress() -> void:
 	seen_intro = file.get_value("progress", "seen_intro", seen_intro)
 	finished = file.get_value("progress", "finished", finished)
 	best_scores = file.get_value("progress", "best_scores", best_scores)
+	decks = file.get_value("progress", "decks", decks)
 	muted = file.get_value("settings", "muted", muted)
 	music_level = file.get_value("settings", "music_level", music_level)
 	effects_level = file.get_value("settings", "effects_level", effects_level)

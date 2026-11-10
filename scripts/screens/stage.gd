@@ -6,6 +6,7 @@ const PICKUP_DISTANCE := 34.0
 const HIT_DISTANCE := 30.0
 const HIT_SAFE_SECONDS := 1.6
 const MIN_SPAWN_TILES := 4
+const QUIZ_LENGTH := 20
 
 var stage_number: int
 var data: Dictionary
@@ -17,6 +18,7 @@ var questions: Array = []
 
 var _facts: Array = []
 var _fact_index := 0
+var _maker: QuestionMaker
 var _world: Node2D
 var _free_cells: Array[Vector2i] = []
 var _overlay: CanvasLayer
@@ -33,10 +35,13 @@ var _paused := false
 func _ready() -> void:
 	stage_number = args["stage"]
 	data = Game.load_stage(stage_number)
-	questions = data["questions"].duplicate()
-	questions.shuffle()
-	_facts = data["facts"].duplicate()
-	_facts.shuffle()
+	# Every run gets a new map, new questions and new example facts.
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	data["map"] = MapMaker.make(rng)
+	_maker = QuestionMaker.new(rng)
+	questions = _maker.quiz(stage_number, QUIZ_LENGTH)
+	_facts = data["facts"]
 	rules = StageRules.new(_goal_count(), questions.size())
 	_build_world()
 	_build_hud()
@@ -239,10 +244,14 @@ func _close_overlay() -> void:
 	_set_frozen(false)
 
 
+## Takes turns between a written fact and a worked example with new numbers.
+## Written facts come from a saved deck, so they don't repeat between runs
+## until every one has been shown.
 func _next_fact() -> String:
-	var fact: String = _facts[_fact_index % _facts.size()]
 	_fact_index += 1
-	return fact
+	if _fact_index % 2 == 0:
+		return _maker.example_fact(stage_number)
+	return _facts[Game.draw_from_deck("facts%d" % stage_number, _facts.size())]
 
 
 func _show_fact(was_seeking: bool) -> void:
