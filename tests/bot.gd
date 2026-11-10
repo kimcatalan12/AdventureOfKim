@@ -13,7 +13,10 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--shots="):
 			_shots_dir = arg.trim_prefix("--shots=")
-			Game.muted = true
+			# Silent, but the HUD still reads "Sound on" for clean screenshots.
+			Game.music_level = 0.0
+			Game.effects_level = 0.0
+			Game.touch_style = Game.TouchStyle.HIDDEN
 	_run.call_deferred()
 
 
@@ -30,6 +33,7 @@ func _run() -> void:
 	Game.seen_intro = false
 	Game.best_scores = {}
 	await _wait()
+	await _shot("title")
 	await _press("Start")
 	await _check_menu_pages()
 	await _press("Play")
