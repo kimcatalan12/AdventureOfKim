@@ -49,7 +49,8 @@ func _run() -> void:
 	await _skip_story()
 	_expect(Game.screen.get_script().resource_path.ends_with("menu.gd"), "back at menu after ending")
 	_expect(Game.finished, "game marked finished")
-	await _check_test_shortcuts()
+	if OS.has_feature("editor"):
+		await _check_test_shortcuts()
 	_finish("BOT PASS")
 
 

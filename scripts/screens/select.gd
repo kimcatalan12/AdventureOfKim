@@ -12,13 +12,13 @@ func _ready() -> void:
 	box.add_child(row)
 	for number in range(1, Game.STAGE_COUNT + 1):
 		row.add_child(_stage_column(number))
-	if OS.is_debug_build():
+	if OS.has_feature("editor"):
 		_add_test_row(box)
 	box.add_child(UI.button("Back", func() -> void: Game.go("menu")))
 
 
-## Only when running from the Godot editor (debug builds), never in the
-## exported game. Lets you jump ahead to test later stages and cutscenes.
+## Only when running from the Godot editor, never in an exported game
+## (not even a debug export, like a test APK). Lets you jump ahead to test later stages and cutscenes.
 ## Using a shortcut turns off saving until you close the game, so your real
 ## progress stays the same.
 func _add_test_row(box: VBoxContainer) -> void:
